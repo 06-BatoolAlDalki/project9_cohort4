@@ -40,7 +40,7 @@ namespace project9_cohort4.Server.Controllers
         // PUT: api/Shelters/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutShelter(int id, updateShelderDTO shelter)
+        public IActionResult PutShelter(int id, updateShelderDTO shelter)
         {
             var existShelder = _context.Shelters.Find(id);
 

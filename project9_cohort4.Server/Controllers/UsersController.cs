@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using project9_cohort4.Server.DTOs;
 using project9_cohort4.Server.Models;
 
 namespace project9_cohort4.Server.Controllers
@@ -44,56 +45,57 @@ namespace project9_cohort4.Server.Controllers
         // PUT: api/Users/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutUser(int id, User user)
+        public IActionResult PutUser(int id, UpdateuserDTO user)
         {
-            if (id != user.UserId)
+            var existUser = _context.Users.Find(id);
+
+            if (existUser == null)
             {
                 return BadRequest();
             }
+            existUser.FullName = user.FullName;
+            existUser.Email = user.Email;
+            existUser.IsAdmin = user.IsAdmin;
+            existUser.Username = user.Username;
+            existUser.PasswordHash = user.PasswordHash;
+           
 
-            _context.Entry(user).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!UserExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
+            _context.Users.Update(existUser);
+            _context.SaveChanges();
+            return Ok(existUser);
         }
 
         // POST: api/Users
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<User>> PostUser(User user)
+        public IActionResult PostUser(AddUserDTO user)
         {
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
+            var newUser = new User
+            {
+                Username = user.Username,
+                Email  = user.Email,
+                IsAdmin = user.IsAdmin,
+                PasswordHash = user.PasswordHash,
+                FullName = user.FullName,
+            };
+            _context.Users.Add(newUser);
+            _context.SaveChanges();
 
-            return CreatedAtAction("GetUser", new { id = user.UserId }, user);
+            return Ok();
+
         }
 
         // DELETE: api/Users/5
         [HttpDelete("{id}")]
         public IActionResult DeleteUser(int id)
         {
-            var shelter = _context.Shelters.Find(id);
-            if (shelter == null)
+            var user = _context.Users.Find(id);
+            if (user == null)
             {
                 return NotFound();
             }
 
-            _context.Shelters.Remove(shelter);
+            _context.Users.Remove(user);
             _context.SaveChanges();
 
             return NoContent();
